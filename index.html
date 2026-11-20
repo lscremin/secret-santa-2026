@@ -107,6 +107,7 @@ dialog .warn{background:#fdf0ee;color:var(--red-d);border-radius:10px;padding:10
     <div class="tag">Noël 2026</div>
     <h1>Secret Santa</h1>
     <div class="banner" id="banner"><span class="spinner"></span> Chargement…</div>
+    <div class="banner hidden" id="rulesWarn" style="background:var(--red);margin-top:10px">⚠️ Ce tirage a été fait avant l'ajout de nouvelles règles. Il faut le relancer depuis le mode maître du jeu.</div>
   </header>
 
   <!-- Connecté en tant que -->
@@ -236,6 +237,7 @@ function render() {
   $("banner").innerHTML = status.launched
     ? `🎁 Tirage ${status.round > 1 ? "relancé" : "lancé"} par <b>${esc(status.launchedBy)}</b> le ${esc(fmt(status.launchedAt))}`
     : `⏳ Le tirage n'a pas encore été lancé`;
+  $("rulesWarn").classList.toggle("hidden", !status.launched || status.rulesOk !== false);
 
   // journal
   const icons = { launch: "🎲", relaunch: "🔁", reveal: "👀" };
