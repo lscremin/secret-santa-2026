@@ -69,8 +69,8 @@ h1{font-family:Fraunces,serif;font-weight:800;color:#fff;font-size:clamp(40px,11
   <p class="sub">Le tirage est fait. Chut, c'est secret 🤫</p>
 
   <section class="card" id="step-pick">
-    <h2>Qui es-tu ?</h2>
-    <div class="grid" id="names"></div>
+    <h2>Lien personnel requis</h2>
+    <p class="hint">Ouvre le lien personnel que tu as reçu par email pour découvrir à qui tu offres un cadeau.</p>
   </section>
 
   <section class="card hidden" id="step-open">
@@ -86,38 +86,36 @@ h1{font-family:Fraunces,serif;font-weight:800;color:#fff;font-size:clamp(40px,11
       <div class="who" id="who"></div>
       <p>Garde ça pour toi 🎄</p>
     </div>
-    <button class="link" id="back">Ce n'est pas moi</button>
   </section>
 
-  <p class="foot">Ne clique que sur ton propre prénom, pas de triche&nbsp;!</p>
+  <p class="foot">Ce lien est personnel : ne le transfère à personne&nbsp;!</p>
 </main>
 
 <script>
 // Assignments are encoded so nobody sees the answer by accident.
-const D={"Claire":"MAAcGAA=","Louis":"PgAcHQ5D","Carla":"Pw6t2wI=","Loïc":"Pw4bHRI=","Marion":"Mg0LDA==","Alex":"MA0PHRNI"};
+const D={"1RpI0Z2k":{"n":"Claire","r":"MAAcGAA="},"yKgZ4Qb0":{"n":"Louis","r":"PgAcHQ5D"},"K8uZk0nH":{"n":"Carla","r":"Pw6t2wI="},"kojBYT_v":{"n":"Loïc","r":"Pw4bHRI="},"vWKCo6Gr":{"n":"Marion","r":"Mg0LDA=="},"5wgi437B":{"n":"Alex","r":"MA0PHRNI"}};
 const K="santa-2026";
 function dec(s){const b=Uint8Array.from(atob(s),c=>c.charCodeAt(0)).map((x,i)=>x^K.charCodeAt(i%K.length));return new TextDecoder().decode(b)}
 
 const $=id=>document.getElementById(id);
-const names=$("names");
-Object.keys(D).forEach(n=>{
-  const b=document.createElement("button");b.className="name";b.textContent=n;
-  b.onclick=()=>pick(n);names.appendChild(b);
-});
 let current=null;
-function pick(n){
-  current=n;$("me").textContent=n;
+function route(){
+  const e=D[location.hash.slice(1)];
+  if(e)pick(e);else{current=null;$("step-open").classList.add("hidden");$("step-pick").classList.remove("hidden")}
+}
+function pick(e){
+  current=e;$("me").textContent=e.n;
   $("step-pick").classList.add("hidden");$("step-open").classList.remove("hidden");
   $("gift").classList.remove("open");$("result").classList.add("hidden");$("hint").classList.remove("hidden");
 }
 function open(){
   if(!current||$("gift").classList.contains("open"))return;
   $("gift").classList.add("open");$("hint").classList.add("hidden");
-  setTimeout(()=>{$("who").textContent=dec(D[current]);$("result").classList.remove("hidden");burst()},450);
+  setTimeout(()=>{$("who").textContent=dec(current.r);$("result").classList.remove("hidden");burst()},450);
 }
 $("gift").onclick=open;
 $("gift").onkeydown=e=>{if(e.key==="Enter"||e.key===" "){e.preventDefault();open()}};
-$("back").onclick=()=>{current=null;$("step-open").classList.add("hidden");$("step-pick").classList.remove("hidden")};
+addEventListener("hashchange",route);route();
 
 // snow + confetti
 const cv=$("snow"),cx=cv.getContext("2d");let W,H,flakes=[],conf=[];
