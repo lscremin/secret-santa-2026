@@ -1,0 +1,138 @@
+<!doctype html>
+<html lang="fr">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Secret Santa 2026</title>
+<meta name="description" content="Découvre à qui tu offres un cadeau 🎁">
+<meta name="robots" content="noindex">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,600;9..144,800&family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+:root{
+  --bg:#0f2a22; --bg2:#173d31; --card:#fbf6ee; --ink:#1d1a17; --muted:#6b645b;
+  --red:#c8372d; --red-d:#9e2a22; --gold:#e2b24a; --snow:rgba(255,255,255,.85);
+}
+*{box-sizing:border-box;margin:0;padding:0}
+html,body{min-height:100%}
+body{
+  font-family:Inter,system-ui,sans-serif;color:var(--ink);
+  background:radial-gradient(1200px 700px at 50% -10%,var(--bg2),var(--bg));
+  min-height:100vh;display:flex;align-items:center;justify-content:center;
+  padding:32px 16px;overflow-x:hidden;
+}
+#snow{position:fixed;inset:0;pointer-events:none;z-index:0}
+.wrap{position:relative;z-index:1;width:100%;max-width:460px;text-align:center}
+.tag{display:inline-block;color:var(--gold);font-weight:600;letter-spacing:.18em;font-size:12px;text-transform:uppercase;margin-bottom:10px}
+h1{font-family:Fraunces,serif;font-weight:800;color:#fff;font-size:clamp(40px,11vw,60px);line-height:1;margin-bottom:12px}
+.sub{color:rgba(255,255,255,.72);font-size:16px;margin-bottom:28px}
+.card{background:var(--card);border-radius:22px;padding:28px 22px;box-shadow:0 24px 60px rgba(0,0,0,.35)}
+.card h2{font-family:Fraunces,serif;font-size:22px;margin-bottom:18px}
+.grid{display:grid;grid-template-columns:repeat(2,1fr);gap:10px}
+.name{
+  font:600 17px Inter,sans-serif;padding:16px 10px;border-radius:14px;border:2px solid #e8dfd1;
+  background:#fff;color:var(--ink);cursor:pointer;transition:transform .12s,border-color .12s,background .12s;
+}
+.name:hover{border-color:var(--red);transform:translateY(-2px)}
+.name:focus-visible{outline:3px solid var(--gold);outline-offset:2px}
+.hidden{display:none}
+.hello{color:var(--muted);margin-bottom:22px;font-size:15px}
+.hello b{color:var(--ink)}
+.gift{position:relative;width:170px;height:170px;margin:0 auto 22px;cursor:pointer;-webkit-tap-highlight-color:transparent}
+.box{position:absolute;left:15px;right:15px;bottom:0;height:110px;background:var(--red);border-radius:10px}
+.lid{position:absolute;left:5px;right:5px;top:40px;height:34px;background:var(--red-d);border-radius:8px;transition:transform .6s cubic-bezier(.3,1.6,.5,1)}
+.ribbon-v{position:absolute;left:50%;top:40px;bottom:0;width:22px;margin-left:-11px;background:var(--gold)}
+.bow{position:absolute;left:50%;top:6px;width:70px;height:40px;margin-left:-35px}
+.bow:before,.bow:after{content:"";position:absolute;top:6px;width:32px;height:28px;border:8px solid var(--gold);border-radius:50% 50% 10% 50%}
+.bow:before{left:0;transform:rotate(-20deg)}
+.bow:after{right:0;transform:scaleX(-1) rotate(-20deg)}
+.lidgroup{position:absolute;inset:0;transition:transform .6s cubic-bezier(.3,1.6,.5,1)}
+.gift:hover .lidgroup{transform:rotate(-4deg) translateY(-4px)}
+.gift.open .lidgroup{transform:translate(70px,-90px) rotate(35deg);opacity:0;transition:transform .7s ease,opacity .7s ease .2s}
+.gift:not(.open){animation:wiggle 2.4s ease-in-out infinite}
+@keyframes wiggle{0%,80%,100%{transform:rotate(0)}85%{transform:rotate(-5deg)}90%{transform:rotate(5deg)}95%{transform:rotate(-3deg)}}
+.hint{color:var(--muted);font-size:14px}
+.result{margin-top:4px}
+.result .lbl{color:var(--muted);font-size:14px;text-transform:uppercase;letter-spacing:.14em;font-weight:600}
+.result .who{font-family:Fraunces,serif;font-weight:800;color:var(--red);font-size:clamp(44px,13vw,64px);line-height:1.1;margin:8px 0 14px;animation:pop .6s cubic-bezier(.3,1.6,.5,1)}
+@keyframes pop{from{transform:scale(.3);opacity:0}to{transform:scale(1);opacity:1}}
+.result p{color:var(--muted);font-size:14px;line-height:1.5}
+.link{background:none;border:0;color:var(--muted);font:500 14px Inter,sans-serif;text-decoration:underline;cursor:pointer;margin-top:20px}
+.foot{color:rgba(255,255,255,.5);font-size:13px;margin-top:22px;line-height:1.5}
+</style>
+</head>
+<body>
+<canvas id="snow" aria-hidden="true"></canvas>
+<main class="wrap">
+  <div class="tag">Noël 2026</div>
+  <h1>Secret Santa</h1>
+  <p class="sub">Le tirage est fait. Chut, c'est secret 🤫</p>
+
+  <section class="card" id="step-pick">
+    <h2>Qui es-tu ?</h2>
+    <div class="grid" id="names"></div>
+  </section>
+
+  <section class="card hidden" id="step-open">
+    <p class="hello">Salut <b id="me"></b> ! Vérifie que personne ne regarde ton écran…</p>
+    <div class="gift" id="gift" role="button" tabindex="0" aria-label="Ouvrir le cadeau">
+      <div class="box"></div>
+      <div class="ribbon-v"></div>
+      <div class="lidgroup"><div class="lid"></div><div class="bow"></div></div>
+    </div>
+    <p class="hint" id="hint">Touche le cadeau pour l'ouvrir</p>
+    <div class="result hidden" id="result">
+      <div class="lbl">Tu offres un cadeau à</div>
+      <div class="who" id="who"></div>
+      <p>Garde ça pour toi 🎄</p>
+    </div>
+    <button class="link" id="back">Ce n'est pas moi</button>
+  </section>
+
+  <p class="foot">Ne clique que sur ton propre prénom, pas de triche&nbsp;!</p>
+</main>
+
+<script>
+// Assignments are encoded so nobody sees the answer by accident.
+const D={"Claire":"MAAcGAA=","Louis":"PgAcHQ5D","Carla":"Pw6t2wI=","Loïc":"Pw4bHRI=","Marion":"Mg0LDA==","Alex":"MA0PHRNI"};
+const K="santa-2026";
+function dec(s){const b=Uint8Array.from(atob(s),c=>c.charCodeAt(0)).map((x,i)=>x^K.charCodeAt(i%K.length));return new TextDecoder().decode(b)}
+
+const $=id=>document.getElementById(id);
+const names=$("names");
+Object.keys(D).forEach(n=>{
+  const b=document.createElement("button");b.className="name";b.textContent=n;
+  b.onclick=()=>pick(n);names.appendChild(b);
+});
+let current=null;
+function pick(n){
+  current=n;$("me").textContent=n;
+  $("step-pick").classList.add("hidden");$("step-open").classList.remove("hidden");
+  $("gift").classList.remove("open");$("result").classList.add("hidden");$("hint").classList.remove("hidden");
+}
+function open(){
+  if(!current||$("gift").classList.contains("open"))return;
+  $("gift").classList.add("open");$("hint").classList.add("hidden");
+  setTimeout(()=>{$("who").textContent=dec(D[current]);$("result").classList.remove("hidden");burst()},450);
+}
+$("gift").onclick=open;
+$("gift").onkeydown=e=>{if(e.key==="Enter"||e.key===" "){e.preventDefault();open()}};
+$("back").onclick=()=>{current=null;$("step-open").classList.add("hidden");$("step-pick").classList.remove("hidden")};
+
+// snow + confetti
+const cv=$("snow"),cx=cv.getContext("2d");let W,H,flakes=[],conf=[];
+function size(){W=cv.width=innerWidth*devicePixelRatio;H=cv.height=innerHeight*devicePixelRatio}
+size();addEventListener("resize",size);
+for(let i=0;i<70;i++)flakes.push({x:Math.random(),y:Math.random(),r:Math.random()*2.2+.8,s:Math.random()*.0015+.0006,d:Math.random()*Math.PI*2});
+function burst(){const cols=["#c8372d","#e2b24a","#ffffff","#2f8f6b"];for(let i=0;i<120;i++)conf.push({x:W/2,y:H*.45,vx:(Math.random()-.5)*18*devicePixelRatio,vy:(Math.random()*-16-4)*devicePixelRatio,c:cols[i%4],w:(Math.random()*6+4)*devicePixelRatio,a:Math.random()*6,life:1})}
+function tick(){
+  cx.clearRect(0,0,W,H);cx.fillStyle="rgba(255,255,255,.8)";
+  for(const f of flakes){f.y+=f.s;f.d+=.01;if(f.y>1.02)f.y=-.02;cx.beginPath();cx.arc((f.x+Math.sin(f.d)*.01)*W,f.y*H,f.r*devicePixelRatio,0,7);cx.fill()}
+  conf=conf.filter(p=>p.life>0);
+  for(const p of conf){p.vy+=.45*devicePixelRatio;p.x+=p.vx;p.y+=p.vy;p.vx*=.98;p.a+=.2;p.life-=.008;cx.save();cx.globalAlpha=Math.max(p.life,0);cx.translate(p.x,p.y);cx.rotate(p.a);cx.fillStyle=p.c;cx.fillRect(-p.w/2,-p.w/4,p.w,p.w/2);cx.restore()}
+  requestAnimationFrame(tick);
+}
+if(!matchMedia("(prefers-reduced-motion: reduce)").matches)tick();
+</script>
+</body>
+</html>
