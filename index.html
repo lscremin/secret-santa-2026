@@ -106,9 +106,7 @@ dialog .warn{background:#fdf0ee;color:var(--red-d);border-radius:10px;padding:10
   <header>
     <div class="tag">Noël 2026</div>
     <h1>Secret Santa</h1>
-    <div class="banner" id="banner"><span class="spinner"></span> Chargement…</div>
-    <div class="banner hidden" id="rulesWarn" style="background:var(--red);margin-top:10px">⚠️ Ce tirage a été fait avant l'ajout de nouvelles règles. Il faut le relancer depuis le mode maître du jeu.</div>
-  </header>
+    <div class="banner" id="banner"><span class="spinner"></span> Chargement…</div>  </header>
 
   <!-- Connecté en tant que -->
   <div class="who-bar hidden" id="whoBar">
@@ -234,16 +232,19 @@ const esc = s => String(s).replace(/[&<>"]/g, c => ({ "&":"&amp;","<":"&lt;",">"
 function render() {
   if (!status) return;
   // bandeau
-  $("banner").innerHTML = status.launched
-    ? `🎁 Tirage ${status.round > 1 ? "relancé" : "lancé"} par <b>${esc(status.launchedBy)}</b> le ${esc(fmt(status.launchedAt))}`
-    : `⏳ Le tirage n'a pas encore été lancé`;
-  $("rulesWarn").classList.toggle("hidden", !status.launched || status.rulesOk !== false);
+  $("banner").innerHTML = !status.launched
+    ? `⏳ Le tirage n'a pas encore été lancé`
+    : status.auto
+      ? `🎁 Tirage refait automatiquement (nouvelles règles) le ${esc(fmt(status.launchedAt))}`
+      : `🎁 Tirage ${status.round > 1 ? "relancé" : "lancé"} par <b>${esc(status.launchedBy)}</b> le ${esc(fmt(status.launchedAt))}`;
 
   // journal
   const icons = { launch: "🎲", relaunch: "🔁", reveal: "👀" };
   const text = { launch: "a lancé le tirage", relaunch: "a relancé le tirage", reveal: "a consulté le tirage complet" };
   $("log").innerHTML = status.log.length
-    ? status.log.map(l => `<li><span class="ico">${icons[l.type]}</span><span><b>${esc(l.by)}</b> ${text[l.type]}${l.type !== "reveal" && l.round > 1 ? ` (tirage n°${l.round})` : ""}<time>${esc(fmt(l.at))}</time></span></li>`).join("")
+    ? status.log.map(l => l.type === "auto"
+      ? `<li><span class="ico">🔄</span><span>Tirage refait automatiquement après l'ajout de nouvelles règles (tirage n°${l.round})<time>${esc(fmt(l.at))}</time></span></li>`
+      : `<li><span class="ico">${icons[l.type]}</span><span><b>${esc(l.by)}</b> ${text[l.type]}${l.type !== "reveal" && l.round > 1 ? ` (tirage n°${l.round})` : ""}<time>${esc(fmt(l.at))}</time></span></li>`).join("")
     : `<li class="empty">Rien pour l'instant.</li>`;
 
   // noms
